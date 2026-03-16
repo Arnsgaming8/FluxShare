@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   basePath: "/FluxShare",
+  distDir: "docs",
 };
 
 export default nextConfig;
