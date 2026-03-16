@@ -11,25 +11,6 @@ A minimal Next.js starter template for building modern web applications.
 - **Static Export** - Deployable to any static hosting (GitHub Pages, Vercel, Netlify)
 - **Google Fonts** - Geist Sans and Geist Mono fonts
 
-## Getting Started
-
-```bash
-# Install dependencies
-bun install
-
-# Start development server
-bun dev
-
-# Build for production
-bun run build
-
-# Run linter
-bun lint
-
-# Type check
-bun typecheck
-```
-
 ## Tech Stack
 
 - Next.js 16.1.3
