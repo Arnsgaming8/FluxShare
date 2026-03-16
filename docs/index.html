@@ -4,14 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FluxShare — Physics-Driven, No-Signup File Sharing</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app"></div>
-  <script src="/api.js"></script>
-  <script src="/physics.js"></script>
-  <script src="/puzzles.js"></script>
-  <script src="/dna.js"></script>
-  <script src="/app.js"></script>
+  <div id="app">
+    <noscript>
+      <div style="padding: 40px; text-align: center; color: #888;">
+        <h1>FluxShare</h1>
+        <p>Please enable JavaScript to use this app.</p>
+      </div>
+    </noscript>
+    <div class="loading" style="text-align: center; padding: 60px; color: #00d4ff;">Loading FluxShare...</div>
+  </div>
+  <script src="api.js"></script>
+  <script src="physics.js"></script>
+  <script src="puzzles.js"></script>
+  <script src="dna.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

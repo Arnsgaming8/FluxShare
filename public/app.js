@@ -2,13 +2,23 @@ let currentRoom = null;
 let physics = null;
 
 function init() {
+  console.log('FluxShare initializing...');
   const hash = window.location.hash.slice(1) || '/';
+  console.log('Route:', hash);
   route(hash);
   
   window.addEventListener('hashchange', () => {
     route(window.location.hash.slice(1) || '/');
   });
 }
+
+document.addEventListener('DOMContentLoaded', init);
+window.addEventListener('load', () => {
+  if (!document.getElementById('app').innerHTML) {
+    init();
+  }
+});
+setTimeout(init, 1000);
 
 function route(path) {
   const app = document.getElementById('app');
