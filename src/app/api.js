@@ -1,6 +1,6 @@
 const API_BASE_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:8080' 
-  : 'https://your-fluxshare-backend.onrender.com';
+  : 'https://fluxshare-0vjn.onrender.com';
 
 const api = {
   async request(endpoint, options = {}) {
