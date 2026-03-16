@@ -1,44 +1,60 @@
 # FluxShare
 
-A minimal Next.js starter template for building modern web applications.
+A physics-driven, no-signup file sharing platform with unique mechanics.
 
 ## Features
 
-- **Next.js 16** - React framework with App Router
-- **React 19** - Latest React with Server Components
-- **Tailwind CSS v4** - Utility-first CSS framework
-- **TypeScript** - Type-safe development
-- **Static Export** - Deployable to any static hosting (GitHub Pages, Vercel, Netlify)
-- **Google Fonts** - Geist Sans and Geist Mono fonts
+- **Gravity Rooms** - Files float and fall with physics simulation (Normal, Zero-G, Reverse gravity)
+- **Quantum Links** - State-changing URLs that evolve on each access (Full → Partial → Collapsed)
+- **Directional Sharing** - N/E/S/W permission links (Full, View, Download, Metadata)
+- **Cryo-Storage** - Freeze files immutably with a passphrase
+- **Puzzle-Unlock** - Micro-puzzles (Slide, Rotate, Match, Logic) instead of passwords
+- **Mirror-Mode** - Download requires uploading a file first
+- **File DNA Trails** - Visual representation of file metadata
 
 ## Tech Stack
 
-- Next.js 16.1.3
-- React 19.2.3
-- Tailwind CSS 4.1.17
-- TypeScript 5.9.3
-- Bun (package manager)
+- Frontend: Vanilla JavaScript, CSS (static for GitHub Pages)
+- Backend: Node.js + Express + SQLite
+- Deployment: Docker
 
 ## Deployment
 
-This project is configured for GitHub Pages deployment in the `docs/` folder.
+### Backend (Render/Railway/Fly.io)
 
-1. Push changes to GitHub
-2. Go to Repository Settings → Pages
+1. Deploy using docker-compose or Dockerfile
+2. Set environment variable `API_BASE_URL` to your backend URL
+
+### Frontend (GitHub Pages)
+
+1. Push to GitHub
+2. Go to Settings → Pages
 3. Source: Deploy from a branch
 4. Branch: main, folder: docs
-5. Save
+5. Update `API_BASE_URL` in `docs/api.js` to point to your backend
 
-## Project Structure
+## Docker Deployment
 
+```bash
+# Build and run
+docker-compose up -d
+
+# Backend runs on port 8080
 ```
-├── src/
-│   └── app/
-│       ├── layout.tsx    # Root layout
-│       ├── page.tsx     # Home page
-│       └── globals.css  # Global styles
-├── docs/                # Static export (GitHub Pages)
-├── next.config.ts       # Next.js configuration
-├── tailwind.config.ts   # Tailwind configuration
-└── package.json         # Dependencies
-```
+
+## API Endpoints
+
+- `POST /api/rooms` - Create room
+- `GET /api/rooms/:id` - Get room
+- `POST /api/rooms/:id/gravity` - Set gravity mode
+- `POST /api/rooms/:id/mirror-mode` - Toggle mirror mode
+- `POST /api/rooms/:id/directional-links` - Generate directional links
+- `POST /api/rooms/:id/files` - Upload file
+- `GET /api/files/:id` - Get file info
+- `GET /api/files/:id/download` - Download file
+- `POST /api/files/:id/freeze` - Freeze file
+- `POST /api/files/:id/thaw` - Thaw file
+- `POST /api/quantum-links` - Create quantum link
+- `POST /api/quantum-links/:id/access` - Access quantum link
+- `POST /api/puzzle-locks` - Create puzzle lock
+- `POST /api/puzzle-locks/:id/solve` - Solve puzzle

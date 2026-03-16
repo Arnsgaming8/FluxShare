@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next.js Template",
-  description: "A minimal Next.js starter template",
+  title: "FluxShare — Physics-Driven, No-Signup File Sharing",
+  description: "A unique file sharing platform with Gravity Rooms, Quantum Links, Directional Sharing, Cryo-Storage, and Puzzle-Unlock Rooms",
 };
 
 export default function RootLayout({

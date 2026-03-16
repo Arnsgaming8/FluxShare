@@ -1,0 +1,19 @@
+{
+  "name": "fluxshare-backend",
+  "version": "1.0.0",
+  "description": "FluxShare Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "better-sqlite3": "^9.4.3",
+    "archiver": "^6.0.1",
+    "crypto": "^1.0.1",
+    "uuid": "^9.0.1"
+  }
+}
