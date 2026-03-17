@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-const { getDb, saveDb } = require('./db');
+const { getDb, saveDb, runQuery, runOne, run } = require('./db');
 
 function generateId() {
   return uuidv4().replace(/-/g, '').substring(0, 12);
@@ -7,9 +7,8 @@ function generateId() {
 
 const Room = {
   create(data = {}) {
-    const db = getDb();
     const id = generateId();
-    db.run(`
+    run(`
       INSERT INTO rooms (id, gravityMode, mirrorMode, directionalLinks)
       VALUES (?, ?, ?, ?)
     `, [id, data.gravityMode || 'normal', data.mirrorMode ? 1 : 0, '{}']);
@@ -18,9 +17,7 @@ const Room = {
   },
 
   get(id) {
-    const db = getDb();
-    const stmt = db.prepare('SELECT * FROM rooms WHERE id = ?');
-    const result = stmt.get([id]);
+    const result = runOne('SELECT * FROM rooms WHERE id = ?', [id]);
     if (result) {
       result.directionalLinks = JSON.parse(result.directionalLinks || '{}');
       result.cryoFiles = JSON.parse(result.cryoFiles || '[]');
@@ -30,7 +27,6 @@ const Room = {
   },
 
   update(id, data) {
-    const db = getDb();
     const fields = [];
     const values = [];
     if (data.gravityMode !== undefined) {
@@ -51,24 +47,22 @@ const Room = {
     }
     if (fields.length > 0) {
       values.push(id);
-      db.run(`UPDATE rooms SET ${fields.join(', ')} WHERE id = ?`, values);
+      run(`UPDATE rooms SET ${fields.join(', ')} WHERE id = ?`, values);
       saveDb();
     }
     return this.get(id);
   },
 
   delete(id) {
-    const db = getDb();
-    db.run('DELETE FROM rooms WHERE id = ?', [id]);
+    run('DELETE FROM rooms WHERE id = ?', [id]);
     saveDb();
   }
 };
 
 const FileObject = {
   create(data) {
-    const db = getDb();
     const id = generateId();
-    db.run(`
+    run(`
       INSERT INTO files (id, roomId, name, size, type, hash, storagePath, dnaSignature, parentFileId, isFrozen)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
@@ -80,9 +74,7 @@ const FileObject = {
   },
 
   get(id) {
-    const db = getDb();
-    const stmt = db.prepare('SELECT * FROM files WHERE id = ?');
-    const result = stmt.get([id]);
+    const result = runOne('SELECT * FROM files WHERE id = ?', [id]);
     if (result) {
       result.isFrozen = !!result.isFrozen;
     }
@@ -90,13 +82,10 @@ const FileObject = {
   },
 
   getByRoom(roomId) {
-    const db = getDb();
-    const stmt = db.prepare('SELECT * FROM files WHERE roomId = ? ORDER BY createdAt DESC');
-    return stmt.all([roomId]);
+    return runQuery('SELECT * FROM files WHERE roomId = ? ORDER BY createdAt DESC', [roomId]);
   },
 
   update(id, data) {
-    const db = getDb();
     const fields = [];
     const values = [];
     if (data.isFrozen !== undefined) {
@@ -109,19 +98,18 @@ const FileObject = {
     }
     if (fields.length > 0) {
       values.push(id);
-      db.run(`UPDATE files SET ${fields.join(', ')} WHERE id = ?`, values);
+      run(`UPDATE files SET ${fields.join(', ')} WHERE id = ?`, values);
       saveDb();
     }
     return this.get(id);
   },
 
   delete(id) {
-    const db = getDb();
     const file = this.get(id);
     if (file && file.isFrozen) {
       throw new Error('Cannot delete frozen file');
     }
-    db.run('DELETE FROM files WHERE id = ?', [id]);
+    run('DELETE FROM files WHERE id = ?', [id]);
     saveDb();
     return file;
   }
@@ -129,9 +117,8 @@ const FileObject = {
 
 const QuantumLink = {
   create(data) {
-    const db = getDb();
     const id = generateId();
-    db.run(`
+    run(`
       INSERT INTO quantum_links (id, targetType, targetId, state)
       VALUES (?, ?, ?, ?)
     `, [id, data.targetType, data.targetId, 1]);
@@ -140,16 +127,14 @@ const QuantumLink = {
   },
 
   get(id) {
-    const db = getDb();
-    const stmt = db.prepare('SELECT * FROM quantum_links WHERE id = ?');
-    return stmt.get([id]);
+    return runOne('SELECT * FROM quantum_links WHERE id = ?', [id]);
   },
 
   access(id) {
     const link = this.get(id);
     if (!link) return null;
     const newState = Math.min(link.state + 1, 3);
-    getDb().run('UPDATE quantum_links SET state = ?, lastAccessed = datetime("now") WHERE id = ?', [newState, id]);
+    run('UPDATE quantum_links SET state = ?, lastAccessed = datetime("now") WHERE id = ?', [newState, id]);
     saveDb();
     return { ...this.get(id), previousState: link.state };
   }
@@ -157,9 +142,8 @@ const QuantumLink = {
 
 const PuzzleLock = {
   create(data) {
-    const db = getDb();
     const id = generateId();
-    db.run(`
+    run(`
       INSERT INTO puzzle_locks (id, targetType, targetId, puzzleSeed, puzzleType, solutionState)
       VALUES (?, ?, ?, ?, ?, ?)
     `, [id, data.targetType, data.targetId, data.puzzleSeed, data.puzzleType, data.solutionState]);
@@ -168,9 +152,7 @@ const PuzzleLock = {
   },
 
   get(id) {
-    const db = getDb();
-    const stmt = db.prepare('SELECT * FROM puzzle_locks WHERE id = ?');
-    return stmt.get([id]);
+    return runOne('SELECT * FROM puzzle_locks WHERE id = ?', [id]);
   },
 
   solve(id, attempt) {
@@ -185,13 +167,10 @@ const PuzzleLock = {
 
 const Session = {
   get(sessionToken) {
-    const db = getDb();
-    let stmt = db.prepare('SELECT * FROM sessions WHERE sessionToken = ?');
-    let session = stmt.get([sessionToken]);
+    let session = runOne('SELECT * FROM sessions WHERE sessionToken = ?', [sessionToken]);
     if (!session) {
-      db.run('INSERT INTO sessions (sessionToken) VALUES (?)', [sessionToken]);
-      stmt = db.prepare('SELECT * FROM sessions WHERE sessionToken = ?');
-      session = stmt.get([sessionToken]);
+      run('INSERT INTO sessions (sessionToken) VALUES (?)', [sessionToken]);
+      session = runOne('SELECT * FROM sessions WHERE sessionToken = ?', [sessionToken]);
       saveDb();
     }
     session.uploadedRooms = JSON.parse(session.uploadedRooms || '[]');
@@ -202,7 +181,7 @@ const Session = {
     const session = this.get(sessionToken);
     if (!session.uploadedRooms.includes(roomId)) {
       session.uploadedRooms.push(roomId);
-      getDb().run('UPDATE sessions SET uploadedRooms = ? WHERE sessionToken = ?', 
+      run('UPDATE sessions SET uploadedRooms = ? WHERE sessionToken = ?', 
         [JSON.stringify(session.uploadedRooms), sessionToken]);
       saveDb();
     }

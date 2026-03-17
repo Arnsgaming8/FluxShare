@@ -31,6 +31,40 @@ function getDb() {
   return db;
 }
 
+function runQuery(sql, params = []) {
+  const stmt = db.prepare(sql);
+  if (params.length > 0) {
+    stmt.bind(params);
+  }
+  const results = [];
+  while (stmt.step()) {
+    results.push(stmt.getAsObject());
+  }
+  stmt.free();
+  return results;
+}
+
+function runOne(sql, params = []) {
+  const stmt = db.prepare(sql);
+  if (params.length > 0) {
+    stmt.bind(params);
+  }
+  let result = null;
+  if (stmt.step()) {
+    result = stmt.getAsObject();
+  }
+  stmt.free();
+  return result;
+}
+
+function run(sql, params = []) {
+  if (params.length > 0) {
+    db.run(sql, params);
+  } else {
+    db.run(sql);
+  }
+}
+
 function saveDb() {
   if (db && fs.existsSync(dir)) {
     const data = db.export();
@@ -105,4 +139,4 @@ async function initDatabase() {
   saveDb();
 }
 
-module.exports = { getDb, initDatabase, saveDb };
+module.exports = { getDb, initDatabase, saveDb, runQuery, runOne, run };
