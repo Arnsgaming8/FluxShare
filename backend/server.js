@@ -20,7 +20,11 @@ if (!fs.existsSync(FILES_DIR)) {
 
 initDatabase();
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'X-Session-Token']
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'docs')));
 

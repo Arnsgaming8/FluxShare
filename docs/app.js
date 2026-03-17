@@ -89,10 +89,12 @@ function renderLandingPage(app) {
   
   document.getElementById('createRoomBtn').onclick = async () => {
     try {
+      document.getElementById('createRoomBtn').textContent = 'Creating...';
       const room = await api.createRoom();
       window.location.hash = `/room/${room.id}`;
     } catch (e) {
-      showError(e.message);
+      showError('Cannot connect to backend: ' + e.message + '. Make sure the backend is running.');
+      document.getElementById('createRoomBtn').textContent = 'Create Room';
     }
   };
   

@@ -25,7 +25,11 @@ const api = {
       config.body = JSON.stringify(options.body);
     }
     
-    const response = await fetch(url, config);
+    try {
+      const response = await fetch(url, config);
+    } catch (networkError) {
+      throw new Error('Network error: ' + networkError.message + '. Backend may be down.');
+    }
     
     if (options.responseType === 'blob') {
       return response;

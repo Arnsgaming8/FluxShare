@@ -5,21 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FluxShare — Physics-Driven, No-Signup File Sharing</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .status-message { padding: 20px; margin: 20px; border-radius: 8px; text-align: center; }
+    .status-loading { background: #1a1a25; color: #00d4ff; }
+    .status-error { background: #2a1a1a; color: #ff4466; }
+    .status-success { background: #1a2a1a; color: #00ff88; }
+  </style>
 </head>
 <body>
   <div id="app">
-    <noscript>
-      <div style="padding: 40px; text-align: center; color: #888;">
-        <h1>FluxShare</h1>
-        <p>Please enable JavaScript to use this app.</p>
-      </div>
-    </noscript>
-    <div class="loading" style="text-align: center; padding: 60px; color: #00d4ff;">Loading FluxShare...</div>
+    <div class="status-message status-loading" id="status">
+      <h2>FluxShare</h2>
+      <p>Loading...</p>
+    </div>
   </div>
-  <script src="api.js"></script>
-  <script src="physics.js"></script>
-  <script src="puzzles.js"></script>
-  <script src="dna.js"></script>
-  <script src="app.js"></script>
+  <script>
+    document.getElementById('status').innerHTML = '<h2>FluxShare</h2><p>Scripts loading...</p>';
+  </script>
+  <script src="api.js" onerror="document.getElementById('status').innerHTML='<h2>Error</h2><p>Failed to load api.js</p>'"></script>
+  <script src="physics.js" onerror="document.getElementById('status').innerHTML='<h2>Error</h2><p>Failed to load physics.js</p>'"></script>
+  <script src="puzzles.js" onerror="document.getElementById('status').innerHTML='<h2>Error</h2><p>Failed to load puzzles.js</p>'"></script>
+  <script src="dna.js" onerror="document.getElementById('status').innerHTML='<h2>Error</h2><p>Failed to load dna.js</p>'"></script>
+  <script src="app.js" onerror="document.getElementById('status').innerHTML='<h2>Error</h2><p>Failed to load app.js</p>'"></script>
+  <script>
+    document.getElementById('status').innerHTML = '<h2>FluxShare</h2><p>Initializing...</p>';
+    function initApp() {
+      if (typeof route !== 'undefined') {
+        document.getElementById('status').style.display = 'none';
+        init();
+      } else {
+        document.getElementById('status').innerHTML = '<h2>Error</h2><p>App failed to initialize. route function not found.</p>';
+      }
+    }
+    setTimeout(initApp, 500);
+  </script>
 </body>
 </html>
