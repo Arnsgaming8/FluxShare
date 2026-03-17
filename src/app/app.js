@@ -88,45 +88,33 @@ function renderLandingPage(app) {
   `;
   
   document.getElementById('createRoomBtn').onclick = async () => {
+    const btn = document.getElementById('createRoomBtn');
+    btn.textContent = 'Creating...';
+    
+    const url = 'https://fluxshare-0vjn.onrender.com/api/rooms';
+    
     try {
-      document.getElementById('createRoomBtn').textContent = 'Creating...';
-      
-      // Test connection first
-      const testRes = await fetch('https://fluxshare-0vjn.onrender.com/api/test', {
+      const response = await fetch(url, {
+        method: 'POST',
         mode: 'cors'
       });
-      const test = await testRes.json();
-      console.log('Test:', test);
       
-      // Now create room
-      const response = await fetch('https://fluxshare-0vjn.onrender.com/api/rooms', { 
-        method: 'POST', 
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      alert('Response: ' + response.status + ' ' + response.statusText);
       
-      // Check status
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-      
-      if (!response.ok) {
-        showError('Server error: ' + response.status);
-        return;
-      }
-      
-      const room = await response.json();
-      console.log('Room:', room);
-      
-      if (room && room.id) {
-        window.location.hash = `/room/${room.id}`;
-      } else if (room && room[0]) {
-        window.location.hash = `/room/${room[0]}`;
+      if (response.ok) {
+        const room = await response.json();
+        alert('Room created: ' + JSON.stringify(room));
+        if (room && room.id) {
+          window.location.hash = '/room/' + room.id;
+        }
       } else {
-        showError('Unexpected response: ' + JSON.stringify(room));
+        alert('Error: ' + response.status);
       }
     } catch (e) {
-      showError('Error: ' + e.message);
+      alert('Exception: ' + e.message);
     }
+    
+    btn.textContent = 'Create Room';
   };
   
   document.getElementById('enterRoomBtn').onclick = () => {
