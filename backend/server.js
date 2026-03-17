@@ -37,6 +37,15 @@ app.use((req, res, next) => {
   next();
 });
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, FILES_DIR),
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 * 1024 } });
+
 const roomsRouter = require('./routes/rooms')(upload, FILES_DIR);
 const filesRouter = require('./routes/files')(upload, FILES_DIR);
 const quantumLinksRouter = require('./routes/quantumLinks');
