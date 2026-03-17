@@ -8,7 +8,7 @@ const { initDatabase } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
+const DATA_DIR = process.env.FLUXSHARE_DATA_DIR || path.join(process.cwd(), 'data');
 const FILES_DIR = path.join(DATA_DIR, 'files');
 
 if (!fs.existsSync(DATA_DIR)) {
