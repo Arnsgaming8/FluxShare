@@ -21,12 +21,17 @@ initDatabase();
 
 // CORS - must be FIRST
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, X-Session-Token, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  console.log(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
+  const origin = req.headers.origin || '*';
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, X-Session-Token, Authorization, Accept');
+  res.header('Access-Control-Max-Age', '3600');
   
   if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  if (req.method === 'HEAD') {
     return res.sendStatus(200);
   }
   next();
