@@ -2,10 +2,11 @@ const initSqlJs = require('sql.js');
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = path.join(__dirname, '..', 'data', 'fluxshare.db');
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
+const dbPath = path.join(DATA_DIR, 'fluxshare.db');
 const dir = path.dirname(dbPath);
 if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir, { recursive: true });
+  fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
 }
 
 let db = null;

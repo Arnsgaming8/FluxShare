@@ -9,4 +9,4 @@ services:
       - key: PORT
         value: 8080
       - key: DATA_DIR
-        value: /app/data
+        value: /opt/render/project/src/data
