@@ -88,7 +88,6 @@ function renderLandingPage(app) {
   `;
   
   document.getElementById('createRoomBtn').onclick = async () => {
-    alert('Clicked! Calling backend...');
     const btn = document.getElementById('createRoomBtn');
     btn.textContent = 'Creating...';
     
@@ -100,15 +99,14 @@ function renderLandingPage(app) {
         mode: 'cors'
       });
       
-      const status = response.status;
-      btn.textContent = 'Status: ' + status;
-      
-      if (status === 200) {
+      if (response.status === 200) {
         const room = await response.json();
-        window.location.hash = '#/room/' + room.id;
-      } else {
-        btn.textContent = 'Error: ' + status;
+        if (room.id) {
+          window.location.hash = '#/room/' + room.id;
+          return;
+        }
       }
+      btn.textContent = 'Failed: ' + response.status;
     } catch (e) {
       btn.textContent = 'Error: ' + e.message;
     }
