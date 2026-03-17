@@ -91,24 +91,23 @@ function renderLandingPage(app) {
     const btn = document.getElementById('createRoomBtn');
     btn.textContent = 'Creating...';
     
-    const url = 'https://fluxshare-0vjn.onrender.com/api/rooms';
-    
     try {
-      const response = await fetch(url, {
+      const response = await fetch('https://fluxshare-0vjn.onrender.com/api/rooms', {
         method: 'POST',
         mode: 'cors'
       });
       
-      if (response.status === 200) {
-        const room = await response.json();
-        if (room.id) {
-          window.location.hash = '#/room/' + room.id;
-          return;
-        }
+      const room = await response.json();
+      console.log('Room:', room);
+      
+      if (room.id) {
+        // Navigate to room page directly using href
+        window.location.href = 'https://arnsgaming8.github.io/FluxShare/#/room/' + room.id;
+      } else {
+        btn.textContent = 'No room ID';
       }
-      btn.textContent = 'Failed: ' + response.status;
     } catch (e) {
-      btn.textContent = 'Error: ' + e.message;
+      btn.textContent = 'Error';
     }
   };
   
