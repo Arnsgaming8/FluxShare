@@ -25,6 +25,14 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'X-Session-Token']
 }));
+
+app.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Session-Token');
+  res.sendStatus(200);
+});
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -58,6 +66,14 @@ app.use('/api/puzzle-locks', puzzleLocksRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/test', (req, res) => {
+  res.json({ success: true, message: 'API is working!' });
+});
+
+app.post('/api/test', (req, res) => {
+  res.json({ success: true, message: 'POST works!' });
 });
 
 app.use(express.static(path.join(__dirname, '..', 'docs')));

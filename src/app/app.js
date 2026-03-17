@@ -90,22 +90,26 @@ function renderLandingPage(app) {
   document.getElementById('createRoomBtn').onclick = async () => {
     try {
       document.getElementById('createRoomBtn').textContent = 'Creating...';
-      const room = await api.createRoom();
-      window.location.hash = `/room/${room.id}`;
+      
+      // Test connection first
+      const testRes = await fetch('https://fluxshare-0vjn.onrender.com/api/test');
+      const test = await testRes.json();
+      console.log('Test:', test);
+      
+      // Now create room
+      const response = await fetch('https://fluxshare-0vjn.onrender.com/api/rooms', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const room = await response.json();
+      console.log('Room:', room);
+      if (room && room.id) {
+        window.location.hash = `/room/${room.id}`;
+      } else if (room[0]) {
+        window.location.hash = `/room/${room[0]}`;
+      }
     } catch (e) {
-      // Try direct fetch as fallback
-      try {
-        const response = await fetch('https://fluxshare-0vjn.onrender.com/api/rooms', { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const room = await response.json();
-        if (room && room.id) {
-          window.location.hash = `/room/${room.id}`;
-          return;
-        }
-      } catch (e2) {}
-      showError(e.message);
+      showError('Error: ' + e.message);
     }
   };
   
