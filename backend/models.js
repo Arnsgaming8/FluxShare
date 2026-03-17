@@ -1,6 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-const crypto = require('crypto');
-const { db } = require('./db');
+const { getDb, saveDb } = require('./db');
 
 function generateId() {
   return uuidv4().replace(/-/g, '').substring(0, 12);
@@ -8,26 +7,30 @@ function generateId() {
 
 const Room = {
   create(data = {}) {
+    const db = getDb();
     const id = generateId();
-    const stmt = db.prepare(`
+    db.run(`
       INSERT INTO rooms (id, gravityMode, mirrorMode, directionalLinks)
       VALUES (?, ?, ?, ?)
-    `);
-    stmt.run(id, data.gravityMode || 'normal', data.mirrorMode ? 1 : 0, JSON.stringify({}));
+    `, [id, data.gravityMode || 'normal', data.mirrorMode ? 1 : 0, '{}']);
+    saveDb();
     return this.get(id);
   },
 
   get(id) {
-    const room = db.prepare('SELECT * FROM rooms WHERE id = ?').get(id);
-    if (room) {
-      room.directionalLinks = JSON.parse(room.directionalLinks || '{}');
-      room.cryoFiles = JSON.parse(room.cryoFiles || '[]');
-      room.mirrorMode = !!room.mirrorMode;
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM rooms WHERE id = ?');
+    const result = stmt.get([id]);
+    if (result) {
+      result.directionalLinks = JSON.parse(result.directionalLinks || '{}');
+      result.cryoFiles = JSON.parse(result.cryoFiles || '[]');
+      result.mirrorMode = !!result.mirrorMode;
     }
-    return room;
+    return result;
   },
 
   update(id, data) {
+    const db = getDb();
     const fields = [];
     const values = [];
     if (data.gravityMode !== undefined) {
@@ -48,43 +51,52 @@ const Room = {
     }
     if (fields.length > 0) {
       values.push(id);
-      db.prepare(`UPDATE rooms SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+      db.run(`UPDATE rooms SET ${fields.join(', ')} WHERE id = ?`, values);
+      saveDb();
     }
     return this.get(id);
   },
 
   delete(id) {
-    db.prepare('DELETE FROM rooms WHERE id = ?').run(id);
+    const db = getDb();
+    db.run('DELETE FROM rooms WHERE id = ?', [id]);
+    saveDb();
   }
 };
 
 const FileObject = {
   create(data) {
+    const db = getDb();
     const id = generateId();
-    const stmt = db.prepare(`
+    db.run(`
       INSERT INTO files (id, roomId, name, size, type, hash, storagePath, dnaSignature, parentFileId, isFrozen)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
+    `, [
       id, data.roomId, data.name, data.size, data.type, data.hash,
       data.storagePath, data.dnaSignature, data.parentFileId || null, data.isFrozen ? 1 : 0
-    );
+    ]);
+    saveDb();
     return this.get(id);
   },
 
   get(id) {
-    const file = db.prepare('SELECT * FROM files WHERE id = ?').get(id);
-    if (file) {
-      file.isFrozen = !!file.isFrozen;
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM files WHERE id = ?');
+    const result = stmt.get([id]);
+    if (result) {
+      result.isFrozen = !!result.isFrozen;
     }
-    return file;
+    return result;
   },
 
   getByRoom(roomId) {
-    return db.prepare('SELECT * FROM files WHERE roomId = ? ORDER BY createdAt DESC').all(roomId);
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM files WHERE roomId = ? ORDER BY createdAt DESC');
+    return stmt.all([roomId]);
   },
 
   update(id, data) {
+    const db = getDb();
     const fields = [];
     const values = [];
     if (data.isFrozen !== undefined) {
@@ -97,58 +109,68 @@ const FileObject = {
     }
     if (fields.length > 0) {
       values.push(id);
-      db.prepare(`UPDATE files SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+      db.run(`UPDATE files SET ${fields.join(', ')} WHERE id = ?`, values);
+      saveDb();
     }
     return this.get(id);
   },
 
   delete(id) {
+    const db = getDb();
     const file = this.get(id);
     if (file && file.isFrozen) {
       throw new Error('Cannot delete frozen file');
     }
-    db.prepare('DELETE FROM files WHERE id = ?').run(id);
+    db.run('DELETE FROM files WHERE id = ?', [id]);
+    saveDb();
     return file;
   }
 };
 
 const QuantumLink = {
   create(data) {
+    const db = getDb();
     const id = generateId();
-    const stmt = db.prepare(`
+    db.run(`
       INSERT INTO quantum_links (id, targetType, targetId, state)
       VALUES (?, ?, ?, ?)
-    `);
-    stmt.run(id, data.targetType, data.targetId, 1);
+    `, [id, data.targetType, data.targetId, 1]);
+    saveDb();
     return this.get(id);
   },
 
   get(id) {
-    return db.prepare('SELECT * FROM quantum_links WHERE id = ?').get(id);
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM quantum_links WHERE id = ?');
+    return stmt.get([id]);
   },
 
   access(id) {
     const link = this.get(id);
     if (!link) return null;
     const newState = Math.min(link.state + 1, 3);
-    db.prepare('UPDATE quantum_links SET state = ?, lastAccessed = CURRENT_TIMESTAMP WHERE id = ?').run(newState, id);
+    getDb().run('UPDATE quantum_links SET state = ?, lastAccessed = datetime("now") WHERE id = ?', [newState, id]);
+    saveDb();
     return { ...this.get(id), previousState: link.state };
   }
 };
 
 const PuzzleLock = {
   create(data) {
+    const db = getDb();
     const id = generateId();
-    const stmt = db.prepare(`
+    db.run(`
       INSERT INTO puzzle_locks (id, targetType, targetId, puzzleSeed, puzzleType, solutionState)
       VALUES (?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(id, data.targetType, data.targetId, data.puzzleSeed, data.puzzleType, data.solutionState);
+    `, [id, data.targetType, data.targetId, data.puzzleSeed, data.puzzleType, data.solutionState]);
+    saveDb();
     return this.get(id);
   },
 
   get(id) {
-    return db.prepare('SELECT * FROM puzzle_locks WHERE id = ?').get(id);
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM puzzle_locks WHERE id = ?');
+    return stmt.get([id]);
   },
 
   solve(id, attempt) {
@@ -163,10 +185,14 @@ const PuzzleLock = {
 
 const Session = {
   get(sessionToken) {
-    let session = db.prepare('SELECT * FROM sessions WHERE sessionToken = ?').get(sessionToken);
+    const db = getDb();
+    let stmt = db.prepare('SELECT * FROM sessions WHERE sessionToken = ?');
+    let session = stmt.get([sessionToken]);
     if (!session) {
-      db.prepare('INSERT INTO sessions (sessionToken) VALUES (?)').run(sessionToken);
-      session = db.prepare('SELECT * FROM sessions WHERE sessionToken = ?').get(sessionToken);
+      db.run('INSERT INTO sessions (sessionToken) VALUES (?)', [sessionToken]);
+      stmt = db.prepare('SELECT * FROM sessions WHERE sessionToken = ?');
+      session = stmt.get([sessionToken]);
+      saveDb();
     }
     session.uploadedRooms = JSON.parse(session.uploadedRooms || '[]');
     return session;
@@ -176,8 +202,9 @@ const Session = {
     const session = this.get(sessionToken);
     if (!session.uploadedRooms.includes(roomId)) {
       session.uploadedRooms.push(roomId);
-      db.prepare('UPDATE sessions SET uploadedRooms = ? WHERE sessionToken = ?')
-        .run(JSON.stringify(session.uploadedRooms), sessionToken);
+      getDb().run('UPDATE sessions SET uploadedRooms = ? WHERE sessionToken = ?', 
+        [JSON.stringify(session.uploadedRooms), sessionToken]);
+      saveDb();
     }
     return session;
   },
