@@ -27,19 +27,18 @@ const api = {
     
     try {
       const response = await fetch(url, config);
+      if (options.responseType === 'blob') {
+        return response;
+      }
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Request failed with status ' + response.status);
+      }
+      return data;
     } catch (networkError) {
-      throw new Error('Network error: ' + networkError.message + '. Backend may be down.');
+      console.error('API Error:', networkError);
+      throw new Error('Cannot connect to backend. Is it running? Error: ' + networkError.message);
     }
-    
-    if (options.responseType === 'blob') {
-      return response;
-    }
-    
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Request failed');
-    }
-    return data;
   },
   
   async createRoom() {
