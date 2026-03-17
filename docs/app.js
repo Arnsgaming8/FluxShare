@@ -98,6 +98,7 @@ function renderLandingPage(app) {
       });
       
       const room = await response.json();
+      alert('Room: ' + JSON.stringify(room));
       console.log('Room:', room);
       
       if (room.id) {
