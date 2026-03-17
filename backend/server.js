@@ -26,16 +26,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'X-Session-Token']
 }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'docs')));
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, FILES_DIR),
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 * 1024 } });
 
 app.use((req, res, next) => {
   let sessionToken = req.cookies?.sessionToken || req.headers['x-session-token'];
@@ -60,6 +50,8 @@ app.use('/api/puzzle-locks', puzzleLocksRouter);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+app.use(express.static(path.join(__dirname, '..', 'docs')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'docs', 'index.html'));
