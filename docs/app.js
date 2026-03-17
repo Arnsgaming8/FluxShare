@@ -88,6 +88,7 @@ function renderLandingPage(app) {
   `;
   
   document.getElementById('createRoomBtn').onclick = async () => {
+    alert('Clicked! Calling backend...');
     const btn = document.getElementById('createRoomBtn');
     btn.textContent = 'Creating...';
     
@@ -104,9 +105,9 @@ function renderLandingPage(app) {
       
       if (status === 200) {
         const room = await response.json();
-        if (room && room.id) {
-          window.location.hash = '#/room/' + room.id;
-        }
+        window.location.hash = '#/room/' + room.id;
+      } else {
+        btn.textContent = 'Error: ' + status;
       }
     } catch (e) {
       btn.textContent = 'Error: ' + e.message;
