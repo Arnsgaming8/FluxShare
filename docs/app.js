@@ -99,20 +99,18 @@ function renderLandingPage(app) {
         mode: 'cors'
       });
       
-      if (response.ok) {
+      const status = response.status;
+      btn.textContent = 'Status: ' + status;
+      
+      if (status === 200) {
         const room = await response.json();
         if (room && room.id) {
-          // Direct navigation
-          window.location.href = '#/room/' + room.id;
+          window.location.hash = '#/room/' + room.id;
         }
-      } else {
-        btn.textContent = 'Error: ' + response.status;
       }
     } catch (e) {
       btn.textContent = 'Error: ' + e.message;
     }
-    
-    setTimeout(() => { btn.textContent = 'Create Room'; }, 3000);
   };
   
   document.getElementById('enterRoomBtn').onclick = () => {
