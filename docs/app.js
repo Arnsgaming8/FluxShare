@@ -99,22 +99,20 @@ function renderLandingPage(app) {
         mode: 'cors'
       });
       
-      alert('Response: ' + response.status + ' ' + response.statusText);
-      
       if (response.ok) {
         const room = await response.json();
-        alert('Room created: ' + JSON.stringify(room));
         if (room && room.id) {
-          window.location.hash = '/room/' + room.id;
+          // Direct navigation
+          window.location.href = '#/room/' + room.id;
         }
       } else {
-        alert('Error: ' + response.status);
+        btn.textContent = 'Error: ' + response.status;
       }
     } catch (e) {
-      alert('Exception: ' + e.message);
+      btn.textContent = 'Error: ' + e.message;
     }
     
-    btn.textContent = 'Create Room';
+    setTimeout(() => { btn.textContent = 'Create Room'; }, 3000);
   };
   
   document.getElementById('enterRoomBtn').onclick = () => {
