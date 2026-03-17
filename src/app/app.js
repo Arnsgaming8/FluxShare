@@ -91,14 +91,17 @@ function renderLandingPage(app) {
     try {
       document.getElementById('createRoomBtn').textContent = 'Creating...';
       
-      // Test connection first
-      const testRes = await fetch('https://fluxshare-0vjn.onrender.com/api/test');
+      // Test connection first - no credentials to avoid CORS issues
+      const testRes = await fetch('https://fluxshare-0vjn.onrender.com/api/test', {
+        mode: 'cors'
+      });
       const test = await testRes.json();
       console.log('Test:', test);
       
       // Now create room
       const response = await fetch('https://fluxshare-0vjn.onrender.com/api/rooms', { 
         method: 'POST', 
+        mode: 'cors',
         headers: { 'Content-Type': 'application/json' }
       });
       const room = await response.json();
@@ -109,7 +112,7 @@ function renderLandingPage(app) {
         window.location.hash = `/room/${room[0]}`;
       }
     } catch (e) {
-      showError('Error: ' + e.message);
+      showError('Error: ' + e.message + '. Check console for details.');
     }
   };
   
