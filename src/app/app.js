@@ -91,7 +91,7 @@ function renderLandingPage(app) {
     try {
       document.getElementById('createRoomBtn').textContent = 'Creating...';
       
-      // Test connection first - no credentials to avoid CORS issues
+      // Test connection first
       const testRes = await fetch('https://fluxshare-0vjn.onrender.com/api/test', {
         mode: 'cors'
       });
@@ -104,15 +104,28 @@ function renderLandingPage(app) {
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' }
       });
+      
+      // Check status
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
+      if (!response.ok) {
+        showError('Server error: ' + response.status);
+        return;
+      }
+      
       const room = await response.json();
       console.log('Room:', room);
+      
       if (room && room.id) {
         window.location.hash = `/room/${room.id}`;
-      } else if (room[0]) {
+      } else if (room && room[0]) {
         window.location.hash = `/room/${room[0]}`;
+      } else {
+        showError('Unexpected response: ' + JSON.stringify(room));
       }
     } catch (e) {
-      showError('Error: ' + e.message + '. Check console for details.');
+      showError('Error: ' + e.message);
     }
   };
   
