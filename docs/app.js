@@ -89,9 +89,22 @@ function renderLandingPage(app) {
   
   document.getElementById('createRoomBtn').onclick = async () => {
     try {
+      document.getElementById('createRoomBtn').textContent = 'Creating...';
       const room = await api.createRoom();
       window.location.hash = `/room/${room.id}`;
     } catch (e) {
+      // Try direct fetch as fallback
+      try {
+        const response = await fetch('https://fluxshare-0vjn.onrender.com/api/rooms', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const room = await response.json();
+        if (room && room.id) {
+          window.location.hash = `/room/${room.id}`;
+          return;
+        }
+      } catch (e2) {}
       showError(e.message);
     }
   };
