@@ -98,17 +98,13 @@ function renderLandingPage(app) {
       });
       
       const room = await response.json();
-      alert('Room: ' + JSON.stringify(room));
-      console.log('Room:', room);
       
       if (room.id) {
-        // Navigate to room page directly using href
+        alert('GOING TO ROOM: ' + room.id);
         window.location.href = 'https://arnsgaming8.github.io/FluxShare/#/room/' + room.id;
-      } else {
-        btn.textContent = 'No room ID';
       }
     } catch (e) {
-      btn.textContent = 'Error';
+      alert('Error: ' + e);
     }
   };
   
