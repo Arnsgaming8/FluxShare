@@ -120,7 +120,11 @@ async function renderRoomPage(app, id, direction) {
   app.innerHTML = '<div class="loading">Loading room...</div>';
   
   try {
-    currentRoom = await api.getRoom(id, direction);
+    const dirParam = direction ? '?dir=' + direction : '';
+    const response = await fetch('https://fluxshare-0vjn.onrender.com/api/rooms/' + id + dirParam, {
+      mode: 'cors'
+    });
+    currentRoom = await response.json();
     
     app.innerHTML = `
       <div class="room-page">
